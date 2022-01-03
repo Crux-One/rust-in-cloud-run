@@ -10,6 +10,7 @@ RUN cargo build --release
 # runtime stage
 FROM rust:latest as runtime
 
+WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app /usr/src/app
 
 # SEE: https://cloud.google.com/run/docs/reference/container-contract
