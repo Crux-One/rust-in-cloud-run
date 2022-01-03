@@ -30,7 +30,7 @@ $ gcloud run deploy cloudrun-tiny-runner --image us-central1-docker.pkg.dev/[pro
 ```
 
 ### Building on M1 chip (ARM based systems)
-To build an image on Apple M1, you must run the following command so that Docker can build container for Cloud Run, because Cloud Run does NOT support any ARM-compatible images at the moment.
+To build an image on Apple M1, you must install [macos-cross-toolchains](https://github.com/messense/homebrew-macos-cross-toolchains) and run the following command so that Docker can build container for x86-based CPUs, because Cloud Run does NOT support any ARM-compatible images at the moment.
 
 ```
 $ docker buildx build . --platform linux/amd64
