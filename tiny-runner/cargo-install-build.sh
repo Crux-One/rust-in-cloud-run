@@ -3,4 +3,4 @@
 cargo install --path . && \
     cargo check && \
     cargo fmt && \
-    cargo build --release
+    cargo build
