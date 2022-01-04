@@ -1,14 +1,26 @@
 # builder stage
 FROM rust:latest as builder
 
+ARG X86
+
 WORKDIR /usr/src/app
 COPY . .
 
+ENV CC_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-gcc
+ENV CXX_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-g++
+ENV AR_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-ar
+ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-unknown-linux-musl-gcc
+
 RUN rustup show
-RUN cargo build --release
+RUN cargo clean
+RUN if [ -n "$X86" ] ; then \
+	rustup target add x86_64-unknown-linux-musl && cargo build --target=x86_64-unknown-linux-musl --release; \
+	else \
+	cargo build --release; \
+	fi
 
 # runtime stage
-FROM rust:latest as runtime
+FROM rust:slim as runtime
 
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app /usr/src/app

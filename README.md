@@ -29,9 +29,40 @@ $ docker tag tiny-runner gcr.io/[project id]/[registry]/[image]:[tag] && \
 $ gcloud run deploy cloudrun-tiny-runner --image us-central1-docker.pkg.dev/[project id]/[registry]/[image]:[tag] --region [region] --platform managed
 ```
 
-### Building on M1 chip (ARM based systems)
-To build an image on Apple M1, you must install [macos-cross-toolchains](https://github.com/messense/homebrew-macos-cross-toolchains) and run the following command so that Docker can build container for x86-based CPUs, because Cloud Run does NOT support any ARM-compatible images at the moment.
+### :warning: Building on M1 chip (ARM based systems)
+To build an image on Apple M1, [macos-cross-toolchains](https://github.com/messense/homebrew-macos-cross-toolchains) must be installed and changed a configuration, run the following commands so that cargo/Docker can build it for x86-based CPUs, because Cloud Run does NOT support any ARM-compatible images at the moment.
+
+#### Installing cross compiler toolchains
+```
+$ brew tap messense/macos-cross-toolchains
+$ brew install x86_64-unknown-linux-musl
+```
+
+#### Setting PATH
+```
+export CC_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-gcc
+export CXX_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-g++
+export AR_x86_64_unknown_linux_musl=x86_64-unknown-linux-musl-ar
+export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-unknown-linux-musl-gcc
+```
+
+#### Cargo Configuration
+You will need to add or modify the following into your projects `.cargo/config` file.
 
 ```
-$ docker buildx build . --platform linux/amd64
+[target.x86_64-unknown-linux-musl]
+linker = "x86_64-linux-musl-gcc"
 ```
+
+#### Building app
+```
+$ cargo build --target=x86_64-unknown-linux-musl
+```
+
+#### Building docker image
+```
+$ docker buildx build . --platform linux/amd64 -t tiny-runner --no-cache
+```
+
+### sccache
+[sccache - Shared Compilation Cache](https://github.com/mozilla/sccache)
