@@ -1,5 +1,5 @@
 # builder stage
-FROM rust:latest as builder
+FROM rust:latest as cargo-builder
 
 ARG X86
 
@@ -20,14 +20,14 @@ RUN if [ -n "$X86" ] ; then \
 	fi
 
 # runtime stage
-FROM rust:slim as runtime
+FROM debian:buster-slim as runtime
 
 WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app /usr/src/app
+COPY --from=cargo-builder /usr/src/app/target/release/runner .
 
 # SEE: https://cloud.google.com/run/docs/reference/container-contract
 # By default, requests are sent to 8080, but you can configure Cloud Run to send requests to the port of your choice.
 ENV PORT 8080
 EXPOSE 8080
 
-ENTRYPOINT ["cargo", "run", "--release"]
+ENTRYPOINT ["./runner"]

@@ -23,7 +23,7 @@ $ gcloud services enable run.googleapis.com --project [project id]
 
 For example, the following commands:
 ```
-$ ./docker-build-x86.sh
+$ ./docker-build.sh
 $ docker tag tiny-runner gcr.io/[project id]/[registry]/[image]:[tag] && \
   docker push us-central1-docker.pkg.dev/[project id]/[registry]/[image]
 $ gcloud run deploy cloudrun-tiny-runner --image us-central1-docker.pkg.dev/[project id]/[registry]/[image]:[tag] --region [region] --platform managed
@@ -60,9 +60,15 @@ $ cargo build --target=x86_64-unknown-linux-musl
 ```
 
 #### Building docker image
+For example, the following commands:
 ```
 $ docker buildx build . --platform linux/amd64 -t tiny-runner --no-cache
 ```
+You can also get same result.
+```
+$ ./docker-build-x86.sh
+```
+
 
 ### sccache
 [sccache - Shared Compilation Cache](https://github.com/mozilla/sccache)
