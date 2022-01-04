@@ -13,7 +13,7 @@ $ cd tiny-runner/
 $ ./cargo-install-build.sh && ./cargo-run.sh
 ```
 
-You can run `docker-run.sh` instead of `cargo-run.sh` in order to run app on a docker container.
+You can run `docker-run.sh` instead of `cargo-run.sh` in order to run the app on a docker container.
 
 ## Pushing an image and deploying app to Cloud Run
 You need to first run this command that will enable a Cloud Run service.
@@ -30,7 +30,7 @@ $ gcloud run deploy cloudrun-tiny-runner --image us-central1-docker.pkg.dev/[pro
 ```
 
 ### :warning: Building on M1 chip (ARM based systems)
-To build an image on Apple M1, [macos-cross-toolchains](https://github.com/messense/homebrew-macos-cross-toolchains) must be installed and changed a configuration, run the following commands so that cargo/Docker can build it for x86-based CPUs, because Cloud Run does NOT support any ARM-compatible images at the moment.
+To build an image on Apple M1, [macos-cross-toolchains](https://github.com/messense/homebrew-macos-cross-toolchains) must be installed and changed a configuration, run the following commands so that cargo/Docker can build it for x86-based CPUs because Cloud Run does NOT support any ARM-compatible images at the moment.
 
 #### Installing cross compiler toolchains
 ```
@@ -47,7 +47,7 @@ export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-unknown-linux-musl-g
 ```
 
 #### Cargo Configuration
-You will need to add or modify the following into your projects `.cargo/config` file.
+You will need to add or modify the following into your project's `.cargo/config` file.
 
 ```
 [target.x86_64-unknown-linux-musl]
@@ -64,7 +64,7 @@ For example, the following commands:
 ```
 $ docker buildx build . --platform linux/amd64 -t tiny-runner --no-cache
 ```
-You can also get same result.
+You can also get the same result with the following script running.
 ```
 $ ./docker-build-x86.sh
 ```
