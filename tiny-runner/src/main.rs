@@ -9,17 +9,13 @@ struct MyObj {
 }
 
 /// This handler uses json extractor
-async fn index(item: web::Json<MyObj>) -> HttpResponse {
-    println!("model: {:?}", &item);
-    HttpResponse::Ok().json(item.0) // <- send response
-}
-
-/// This handler uses json extractor
-async fn json(body: web::Bytes) -> Result<HttpResponse, Error> {
-    let result = json::parse(std::str::from_utf8(&body).unwrap()); // return Result
+async fn api(body: web::Bytes) -> Result<HttpResponse, Error> {
+    let result = json::parse(std::str::from_utf8(&body).unwrap());
 
     let injson: JsonValue = match result {
-        Ok(v) => v,
+        Ok(_) => {
+            json::object! {"api": ""}
+        }
         Err(e) => json::object! {"err" => e.to_string() },
     };
 
@@ -33,10 +29,16 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .data(web::JsonConfig::default().limit(4096)) // <- limit size of the payload (global configuration)
-            .service(web::resource("/json").route(web::post().to(json)))
+            .service(web::resource("/api/").route(web::post().to(api)))
             .service(web::resource("/").route(web::post().to(index)))
     })
     .bind("0.0.0.0:8080")?
     .run()
     .await
+}
+
+async fn index() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(r#" {"message": "tiny-runner is running..."} "#)
 }
