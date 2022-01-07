@@ -16,17 +16,18 @@ $ ./cargo-install-build.sh && ./cargo-run.sh
 You can run `docker-run.sh` instead of `cargo-run.sh` in order to run the app on a docker container.
 
 ## Pushing an image and deploying app to Cloud Run
-You need to first run this command that will enable a Cloud Run service.
+You need to first run these commands that will enable a Cloud Run service and configure the registry you have.
 ```
 $ gcloud services enable run.googleapis.com --project [project id]
+$ gcloud auth configure-docker asia-northeast1-docker.pkg.dev
 ```
 
 For example, the following commands:
 ```
 $ ./docker-build.sh
-$ docker tag tiny-runner gcr.io/[project id]/[registry]/[image]:[tag] && \
-  docker push us-central1-docker.pkg.dev/[project id]/[registry]/[image]
-$ gcloud run deploy cloudrun-tiny-runner --image us-central1-docker.pkg.dev/[project id]/[registry]/[image]:[tag] --region [region] --platform managed
+$ docker tag tiny-runner asia-northeast1-docker.pkg.dev/[project id]/[registry]/[image]:[tag] && \
+  docker push asia-northeast1-docker.pkg.dev/[project id]/[registry]/[image]
+$ gcloud run deploy cloudrun-tiny-runner --image asia-northeast1-docker.pkg.dev/[project id]/[registry]/[image]:[tag] --region [region] --platform managed
 ```
 
 ### :warning: Building on M1 chip (ARM based systems)
