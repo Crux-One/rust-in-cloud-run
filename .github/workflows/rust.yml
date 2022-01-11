@@ -7,8 +7,14 @@ on:
     branches: [ develop, main ]
 
 env:
+  APP_NAME: tiny-runner
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./${{ env.APP_NAME }}
 
 jobs:
   build-and-test:
@@ -17,6 +23,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Run git status
+      run: git status
     - name: Build app
       run: cargo build --verbose
     - name: Run tests
