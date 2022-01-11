@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop, main ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./tiny-runner
+
+jobs:
+  build-and-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run git status
+      run: git status
+    - name: Build app
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose

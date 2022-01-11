@@ -14,7 +14,7 @@ async fn api(body: web::Bytes) -> Result<HttpResponse, Error> {
 
     let injson: JsonValue = match result {
         Ok(_) => {
-            json::object! {"api": ""}
+            json::object! {"msg": "ok"}
         }
         Err(e) => json::object! {"err" => e.to_string() },
     };
@@ -41,4 +41,35 @@ async fn index() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("application/json")
         .body(r#" {"message": "tiny-runner is running..."} "#)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{http, test, App};
+
+    #[actix_rt::test]
+    async fn test_index_post_ok() {
+        let mut app = test::init_service(App::new().route("/", web::post().to(index))).await;
+
+        let req = test::TestRequest::post().uri("/").to_request();
+        let resp = test::call_service(&mut app, req).await;
+
+        assert_eq!(resp.status(), http::StatusCode::OK);
+    }
+
+    #[actix_rt::test]
+    async fn test_api_post_ok() {
+        let mut app = test::init_service(App::new().route("/api/", web::post().to(api))).await;
+
+        let req_body = r#"{"uid":"123", "pw":"abc123"}"#;
+        let req = test::TestRequest::post()
+            .set_json(&req_body)
+            .uri("/api/")
+            .to_request();
+
+        let resp = test::call_service(&mut app, req).await;
+
+        assert_eq!(resp.status(), http::StatusCode::OK);
+    }
 }
