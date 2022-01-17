@@ -1,6 +1,9 @@
+use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 use actix_web::{web, App, Error, HttpResponse, HttpServer};
+use chrono::{DateTime, Local};
 use json::JsonValue;
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct MyObj {
@@ -26,11 +29,28 @@ async fn api(body: web::Bytes) -> Result<HttpResponse, Error> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    let mem_store = MemoryStore::new();
+
+    HttpServer::new(move || {
         App::new()
+            // Register the middleware
+            // which allows for a maximum of
+            // 100 requests per minute per client
+            // based on IP address
+            .wrap(
+                RateLimiter::new(MemoryStoreActor::from(mem_store.clone()).start())
+                    .with_interval(Duration::from_secs(1))
+                    .with_max_requests(1)
+                    .with_identifier(|req| {
+                        let content_type = req.headers().get("Content-Type").unwrap();
+                        let content_type = content_type.to_str().unwrap();
+                        println!("Content-Type is {}", content_type.to_string());
+                        Ok(content_type.to_string())
+                    }),
+            )
+            .route("/", web::post().to(index))
             .data(web::JsonConfig::default().limit(4096)) // <- limit size of the payload (global configuration)
             .service(web::resource("/api/").route(web::post().to(api)))
-            .service(web::resource("/").route(web::post().to(index)))
     })
     .bind("0.0.0.0:8080")?
     .run()
@@ -38,9 +58,20 @@ async fn main() -> std::io::Result<()> {
 }
 
 async fn index() -> HttpResponse {
+    let res = json::object! {
+        "message": "tiny-runner is running...",
+        "date": now()
+    };
+
     HttpResponse::Ok()
         .content_type("application/json")
-        .body(r#" {"message": "tiny-runner is running..."} "#)
+        .body(res.dump())
+}
+
+fn now() -> String {
+    let local_now: DateTime<Local> = Local::now();
+
+    local_now.format("%Y-%m-%d- %H:%M:%S %Z").to_string()
 }
 
 #[cfg(test)]
